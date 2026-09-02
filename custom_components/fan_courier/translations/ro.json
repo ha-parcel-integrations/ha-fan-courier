@@ -1,0 +1,20 @@
+{
+  "title": "FAN Courier",
+  "config": {"step": {"user": {"title": "Configurare FAN Courier", "description": "Urmărirea FAN Courier nu necesită cont sau cod poștal. Adăugați colete ulterior din opțiunile integrării sau prin serviciul `fan_courier.track_parcel`."}}, "abort": {"already_configured": "FAN Courier este deja configurat."}},
+  "options": {"step": {
+    "init": {"title": "Opțiuni FAN Courier", "menu_options": {"parcels": "Gestionare colete", "settings": "Setări"}, "sections": {
+      "parcels": {"name": "Colete", "data": {"add": "Adaugă un colet", "remove": "Elimină colete"}, "data_description": {"add": "Introduceți un cod de urmărire FAN Courier."}},
+      "delivered": {"name": "Colete livrate", "data": {"delivered_filter_type": "Filtrează după", "delivered_filter_amount": "Număr"}, "data_description": {"delivered_filter_type": "Arată coletele livrate din ultimele X zile sau limitează la cele mai recente X.", "delivered_filter_amount": "Numărul de zile sau colete."}},
+      "history": {"name": "Istoric colet", "data": {"include_history": "Include istoricul stărilor"}, "data_description": {"include_history": "Adaugă istoricul actualizărilor de stare pentru fiecare colet."}}
+    }},
+    "parcels": {"title": "Gestionare colete", "data": {"tracking_codes": "Coduri de urmărire"}},
+    "settings": {"title": "Setări", "data": {"delivered_filter_type": "Colete livrate: filtrează după", "delivered_filter_amount": "Colete livrate: număr", "include_history": "Include istoricul stărilor"}}
+  }, "error": {"invalid_tracking_code": "Acesta nu pare a fi un cod de urmărire FAN Courier.", "already_tracked": "Acest colet este deja urmărit."}},
+  "selector": {"delivered_filter_type": {"options": {"days": "Zile", "parcels": "Număr de colete"}}},
+  "services": {
+    "track_parcel": {"name": "Urmărește colet", "description": "Începe urmărirea unui colet FAN Courier.", "fields": {"tracking_code": {"name": "Cod de urmărire", "description": "Codul de urmărire FAN Courier."}}},
+    "untrack_parcel": {"name": "Oprește urmărirea coletului", "description": "Oprește urmărirea unui colet FAN Courier.", "fields": {"tracking_code": {"name": "Cod de urmărire", "description": "Codul de urmărire FAN Courier care nu mai trebuie urmărit."}}}
+  },
+  "device_automation": {"trigger_type": {"parcel_registered": "Un colet a fost înregistrat", "parcel_status_changed": "Starea unui colet s-a schimbat", "parcel_delivered": "Un colet a fost livrat", "parcel_delivery_time_changed": "Ora estimată de livrare s-a schimbat"}},
+  "entity": {"button": {"refresh": {"name": "Actualizează"}}, "calendar": {"deliveries": {"name": "Livrări"}}, "sensor": {"incoming_parcels": {"name": "Colete primite", "unit_of_measurement": "colete"}, "next_delivery": {"name": "Următoarea livrare"}, "awaiting_pickup": {"name": "Gata de ridicare", "unit_of_measurement": "colete"}, "delivered_parcels": {"name": "Colete livrate", "unit_of_measurement": "colete"}, "last_update": {"name": "Ultima actualizare reușită"}, "parcel": {"name": "Colet {barcode}"}}}
+}
