@@ -1,7 +1,11 @@
 """FAN-specific normalisation tests."""
 import pytest
 
-from custom_components.fan_courier.const import CAPABILITIES, ParcelStatus
+from custom_components.fan_courier.const import (
+    CAPABILITIES,
+    KNOWN_CAPABILITIES,
+    ParcelStatus,
+)
 from custom_components.fan_courier.parcels import (
     build_history,
     map_parcel_status,
@@ -94,7 +98,57 @@ def test_history_timestamp_none_for_unparseable_date():
     assert history[0]["timestamp"] is None
 
 
-def test_history_is_opt_in_and_capabilities_are_true():
+def test_history_is_opt_in():
     assert normalize_parcel(active_sample())["history"] is None
     assert normalize_parcel(active_sample(), include_history=True)["history"]
-    assert CAPABILITIES == {"weight", "dimensions", "pickup_point", "url", "history"}
+
+
+CANONICAL_KEYS = [
+    "carrier",
+    "barcode",
+    "sender",
+    "receiver",
+    "status",
+    "raw_status",
+    "delivered",
+    "delivered_at",
+    "planned_from",
+    "planned_to",
+    "pickup",
+    "pickup_point",
+    "url",
+    "weight",
+    "dimensions",
+    "history",
+    "raw",
+]
+
+
+def test_normalize_publishes_exactly_the_canonical_keys():
+    """The aggregator and cross-carrier dashboards depend on this key set."""
+    assert list(normalize_parcel(delivered_sample())) == CANONICAL_KEYS
+
+
+def test_capabilities_are_known_values():
+    """A typo here would silently misreport this carrier on the docs site."""
+    assert CAPABILITIES <= KNOWN_CAPABILITIES
+
+
+def test_capabilities_match_what_normalize_parcel_actually_returns():
+    delivered = normalize_parcel(delivered_sample())
+    active = normalize_parcel(active_sample())
+    pickup = normalize_parcel(pickup_sample())
+    with_history = normalize_parcel(delivered_sample(), include_history=True)
+
+    if "weight" in CAPABILITIES:
+        assert delivered["weight"] is not None
+    if "dimensions" in CAPABILITIES:
+        assert delivered["dimensions"] is not None
+    if "delivery_window" in CAPABILITIES:
+        assert active["planned_from"] is not None or active["planned_to"] is not None
+    if "pickup_point" in CAPABILITIES:
+        assert pickup["pickup_point"] is not None
+    if "url" in CAPABILITIES:
+        assert delivered["url"] is not None
+    if "history" in CAPABILITIES:
+        assert with_history["history"] is not None
