@@ -2,7 +2,7 @@
   "domain": "fan_courier",
   "name": "FAN Courier",
   "codeowners": [
-    "@peternijssen"
+    "@peter-mdf"
   ],
   "config_flow": true,
   "documentation": "https://github.com/ha-parcel-integrations/ha-fan-courier",
