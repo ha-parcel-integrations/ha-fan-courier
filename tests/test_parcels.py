@@ -152,3 +152,42 @@ def test_capabilities_match_what_normalize_parcel_actually_returns():
         assert delivered["url"] is not None
     if "history" in CAPABILITIES:
         assert with_history["history"] is not None
+
+
+@pytest.mark.parametrize("code", ["H2", "H12", "H13", "H15", "H17", "S35"])
+def test_warehouse_and_resend_codes_are_in_transit(code):
+    assert map_parcel_status(code) is ParcelStatus.IN_TRANSIT
+
+
+@pytest.mark.parametrize(
+    "code",
+    ["S4", "S5", "S10", "S14", "S19", "S20", "S21", "S22", "S24", "S25", "S27", "S28", "S30", "S42"],
+)
+def test_delivery_obstacle_codes_are_problems(code):
+    assert map_parcel_status(code) is ParcelStatus.PROBLEM
+
+
+@pytest.mark.parametrize("code", ["S6", "S7", "S15", "S50", "S37"])
+def test_refusal_and_compensation_codes_are_problems(code):
+    assert map_parcel_status(code) is ParcelStatus.PROBLEM
+
+
+def test_return_code_is_returning():
+    assert map_parcel_status("S43") is ParcelStatus.RETURNING
+
+
+@pytest.mark.parametrize("code", ["S8", "S9", "S11", "S12", "S16", "S33", "S38", "S49", "S56", "S65"])
+def test_ambiguous_codes_stay_unmapped_and_warn(code, caplog):
+    assert map_parcel_status(code) is ParcelStatus.UNKNOWN
+    assert f"status={code} " in caplog.text
+
+
+def test_newest_obstacle_event_drives_the_parcel_status():
+    raw = active_sample()
+    raw["events"].append(
+        {"id": "S4", "name": "Adresa incompleta", "location": "Cluj", "date": "2025-08-06 09:00:00"}
+    )
+    parcel = normalize_parcel(raw)
+    assert parcel["status"] is ParcelStatus.PROBLEM
+    assert parcel["raw_status"] == "S4"
+    assert parcel["pickup"] is False

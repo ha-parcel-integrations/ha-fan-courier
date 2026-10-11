@@ -70,7 +70,21 @@ confirmed fact — and publishes them with that offset on both
 separate, unconfirmed field. Locker-keyword events can expose an
 `at_pickup_point` status and
 the event location as `pickup_point`. Unknown event codes become `unknown`
-and emit a one-shot warning. API mechanics remain in the private
+and emit a one-shot warning.
+
+The code map follows FAN Courier's own wording for each code. Codes that report
+a door-step obstacle (address, contact, payment or identity), a refusal, or a
+compensation map to `problem`; `S43` (return) maps to `returning`. Deliberately
+**unmapped** because their wording does not settle a stage: `S8` (delivery from
+a FAN office: waiting there or already handed over), `S9` (redirected: the
+parcel continues under another AWB, so this one may never get another event),
+`S11`/`S12` (a notification or a rescheduled delivery, not a stated problem),
+`S16`/`S33` (return on time / return requested), `S38`, `S49`, and the
+tracker-page-only `S56`/`S65`. `S46` maps to `at_pickup_point` on the
+carrier's "handed over on the delivery point" wording; it has not been
+confirmed that the parcel actually waits there. The locker-keyword rule matches
+on the event name, so an event that merely mentions a FANbox (for example a
+sender drop-off) would also read as `at_pickup_point`. API mechanics remain in the private
 carrier-research notes.
 
 ## Running tests

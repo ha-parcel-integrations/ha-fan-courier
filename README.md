@@ -125,8 +125,8 @@ The `status` field is the carrier-agnostic enum shared by the whole integration 
 | `out_for_delivery` | With the courier today |
 | `at_pickup_point` | Waiting for you at a pickup location |
 | `delivered` | Delivered |
-| `returning` | Going back to the sender |
-| `problem` | FAN Courier reports a delivery exception (e.g. a delivery notice/aviso) |
+| `returning` | FAN Courier reports a return, or a return shipment is linked to the parcel |
+| `problem` | FAN Courier reports a delivery exception: a delivery notice (aviso), an address, contact, payment or identity problem at the door, a refused parcel, or a compensated one |
 | `unknown` | An event code not yet mapped by the integration |
 
 The carrier event code is available as `raw_status`; the complete carrier payload stays under `raw`.
