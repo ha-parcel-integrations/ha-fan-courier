@@ -48,7 +48,7 @@ This repo follows it exactly.
 ## Carrier-specific notes
 
 FAN Courier is a keyless, code-based integration. The complete carrier payload
-stays under `raw`; diagnostics, logs and HA events recursively redact AWB-like
+stays under `raw`; diagnostics and logs recursively redact AWB-like
 identifiers, signer data, locations and free event text. `weight` (kilograms)
 and `dimensions` (centimetres, via the shared `format_dimensions` helper) come
 straight from the response's root-level `weight` and `dimensions` fields —
