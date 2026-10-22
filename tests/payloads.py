@@ -10,11 +10,16 @@ def event(code: str, date: str, name: str, location: str = "Bucuresti") -> dict:
 
 def active_sample(code: str = ACTIVE_CODE) -> dict:
     return {
-        "awbNumber": code, "trackingNumber": code, "weight": 5,
+        "awbNumber": code,
+        "trackingNumber": code,
+        "weight": 5,
         "confirmation": {"name": "REDACTED", "date": "2025-08-05 12:00:00"},
         "returnAwbNumber": None,
         "dimensions": {"length": 20, "width": 20, "height": 10},
-        "events": [event("C0", "2025-08-04 08:00:00", "Expeditie ridicata"), event("C1", "2025-08-05 08:00:00", "In livrare")],
+        "events": [
+            event("C0", "2025-08-04 08:00:00", "Expeditie ridicata"),
+            event("C1", "2025-08-05 08:00:00", "In livrare"),
+        ],
     }
 
 
@@ -26,5 +31,9 @@ def delivered_sample(code: str = DELIVERED_CODE) -> dict:
 
 def pickup_sample() -> dict:
     sample = active_sample()
-    sample["events"].append(event("H4", "2025-08-05 12:00:00", "Disponibil pentru ridicare", "Easybox Central"))
+    sample["events"].append(
+        event(
+            "H4", "2025-08-05 12:00:00", "Disponibil pentru ridicare", "Easybox Central"
+        )
+    )
     return sample

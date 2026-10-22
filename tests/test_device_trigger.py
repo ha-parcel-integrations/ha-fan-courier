@@ -1,4 +1,5 @@
 """Tests for FAN Courier device triggers."""
+
 from custom_components.fan_courier.const import DOMAIN
 from custom_components.fan_courier.device_trigger import (
     TRIGGER_EVENTS,

@@ -13,6 +13,7 @@ Keep the coordinator contract:
 * lets ``aiohttp.ClientError`` propagate untouched — ``DataUpdateCoordinator``
   already wraps those into ``UpdateFailed``.
 """
+
 from __future__ import annotations
 
 import logging
@@ -66,7 +67,9 @@ class FANCourierApiClient:
             if response.status == 429:
                 retry_after_header = response.headers.get("Retry-After")
                 try:
-                    retry_after = float(retry_after_header) if retry_after_header else None
+                    retry_after = (
+                        float(retry_after_header) if retry_after_header else None
+                    )
                 except ValueError:
                     retry_after = None  # an HTTP-date, not seconds; let the caller's own backoff handle it
                 raise FANCourierApiError(
@@ -93,9 +96,7 @@ class FANCourierApiClient:
             payload = payload[0]
         if not isinstance(payload, dict):
             raise FANCourierApiError("unexpected body")
-        if payload.get("error") or (
-            "message" in payload and "events" not in payload
-        ):
+        if payload.get("error") or ("message" in payload and "events" not in payload):
             return None
         if not isinstance(payload.get("events"), list):
             raise FANCourierApiError("success response missing events")

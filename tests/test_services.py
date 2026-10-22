@@ -1,18 +1,14 @@
 """Tests for the FAN Courier services (track_parcel / untrack_parcel)."""
+
 from unittest.mock import AsyncMock, patch
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.fan_courier.const import (
-    CONF_PARCELS,
-    CONF_TRACKING_CODE,
-    DOMAIN,
-)
+from custom_components.fan_courier.const import CONF_PARCELS, CONF_TRACKING_CODE, DOMAIN
 
 from .payloads import active_sample
 
 _SAMPLE = active_sample()
-
 
 
 async def _setup(hass, parcels: list[dict] | None = None) -> MockConfigEntry:
@@ -58,14 +54,12 @@ async def test_track_parcel_preserves_code(hass):
         await hass.services.async_call(
             DOMAIN,
             "track_parcel",
-        {CONF_TRACKING_CODE: " example-999 999 "},
+            {CONF_TRACKING_CODE: " example-999 999 "},
             blocking=True,
         )
         await hass.async_block_till_done()
 
-    assert entry.options[CONF_PARCELS] == [
-        {CONF_TRACKING_CODE: "example-999 999"}
-    ]
+    assert entry.options[CONF_PARCELS] == [{CONF_TRACKING_CODE: "example-999 999"}]
 
 
 async def test_track_parcel_accepts_short_code(hass):
@@ -94,9 +88,7 @@ async def test_track_parcel_duplicate_is_noop(hass):
 
 
 async def test_untrack_parcel_removes_from_options(hass):
-    entry = await _setup(
-        hass, parcels=[{CONF_TRACKING_CODE: "EXAMPLE999999"}]
-    )
+    entry = await _setup(hass, parcels=[{CONF_TRACKING_CODE: "EXAMPLE999999"}])
     with patch(
         "custom_components.fan_courier.api.FANCourierApiClient.async_get_parcel",
         new=AsyncMock(return_value=_SAMPLE),
@@ -113,9 +105,7 @@ async def test_untrack_parcel_removes_from_options(hass):
 
 
 async def test_untrack_unknown_code_is_noop(hass):
-    entry = await _setup(
-        hass, parcels=[{CONF_TRACKING_CODE: "EXAMPLE999999"}]
-    )
+    entry = await _setup(hass, parcels=[{CONF_TRACKING_CODE: "EXAMPLE999999"}])
     with patch(
         "custom_components.fan_courier.api.FANCourierApiClient.async_get_parcel",
         new=AsyncMock(return_value=_SAMPLE),

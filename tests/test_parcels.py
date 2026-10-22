@@ -1,4 +1,5 @@
 """FAN-specific normalisation tests."""
+
 import pytest
 
 from custom_components.fan_courier.const import (
@@ -17,7 +18,21 @@ from .payloads import active_sample, delivered_sample, pickup_sample
 
 @pytest.mark.parametrize(
     ("code", "status"),
-    [("C0", ParcelStatus.REGISTERED), ("H0", ParcelStatus.IN_TRANSIT), ("H1", ParcelStatus.IN_TRANSIT), ("H3", ParcelStatus.IN_TRANSIT), ("H4", ParcelStatus.IN_TRANSIT), ("H10", ParcelStatus.IN_TRANSIT), ("H11", ParcelStatus.IN_TRANSIT), ("C1", ParcelStatus.OUT_FOR_DELIVERY), ("S1", ParcelStatus.OUT_FOR_DELIVERY), ("S2", ParcelStatus.DELIVERED), ("S3", ParcelStatus.PROBLEM), ("S46", ParcelStatus.AT_PICKUP_POINT), ("S47", ParcelStatus.IN_TRANSIT)],
+    [
+        ("C0", ParcelStatus.REGISTERED),
+        ("H0", ParcelStatus.IN_TRANSIT),
+        ("H1", ParcelStatus.IN_TRANSIT),
+        ("H3", ParcelStatus.IN_TRANSIT),
+        ("H4", ParcelStatus.IN_TRANSIT),
+        ("H10", ParcelStatus.IN_TRANSIT),
+        ("H11", ParcelStatus.IN_TRANSIT),
+        ("C1", ParcelStatus.OUT_FOR_DELIVERY),
+        ("S1", ParcelStatus.OUT_FOR_DELIVERY),
+        ("S2", ParcelStatus.DELIVERED),
+        ("S3", ParcelStatus.PROBLEM),
+        ("S46", ParcelStatus.AT_PICKUP_POINT),
+        ("S47", ParcelStatus.IN_TRANSIT),
+    ],
 )
 def test_maps_evidenced_codes(code, status):
     assert map_parcel_status(code) is status
@@ -33,9 +48,17 @@ def test_normalizes_latest_event_and_deeplink():
     assert parcel["status"] is ParcelStatus.OUT_FOR_DELIVERY
     assert parcel["raw_status"] == "C1"
     assert parcel["barcode"] == "7000138347202"
-    assert parcel["url"] == "https://www.fancourier.ro/awb-tracking/?tracking=7000138347202"
+    assert (
+        parcel["url"]
+        == "https://www.fancourier.ro/awb-tracking/?tracking=7000138347202"
+    )
     assert parcel["weight"] == 5
-    assert parcel["dimensions"] == {"length": 20, "width": 20, "height": 10, "text": "20 x 20 x 10 cm"}
+    assert parcel["dimensions"] == {
+        "length": 20,
+        "width": 20,
+        "height": 10,
+        "text": "20 x 20 x 10 cm",
+    }
     assert parcel["sender"] is None
     assert parcel["receiver"] == "REDACTED"
     assert parcel["raw"] is not None
@@ -161,7 +184,22 @@ def test_warehouse_and_resend_codes_are_in_transit(code):
 
 @pytest.mark.parametrize(
     "code",
-    ["S4", "S5", "S10", "S14", "S19", "S20", "S21", "S22", "S24", "S25", "S27", "S28", "S30", "S42"],
+    [
+        "S4",
+        "S5",
+        "S10",
+        "S14",
+        "S19",
+        "S20",
+        "S21",
+        "S22",
+        "S24",
+        "S25",
+        "S27",
+        "S28",
+        "S30",
+        "S42",
+    ],
 )
 def test_delivery_obstacle_codes_are_problems(code):
     assert map_parcel_status(code) is ParcelStatus.PROBLEM
@@ -176,7 +214,9 @@ def test_return_code_is_returning():
     assert map_parcel_status("S43") is ParcelStatus.RETURNING
 
 
-@pytest.mark.parametrize("code", ["S8", "S9", "S11", "S12", "S16", "S33", "S38", "S49", "S56", "S65"])
+@pytest.mark.parametrize(
+    "code", ["S8", "S9", "S11", "S12", "S16", "S33", "S38", "S49", "S56", "S65"]
+)
 def test_ambiguous_codes_stay_unmapped_and_warn(code, caplog):
     assert map_parcel_status(code) is ParcelStatus.UNKNOWN
     assert f"status={code} " in caplog.text
@@ -185,7 +225,12 @@ def test_ambiguous_codes_stay_unmapped_and_warn(code, caplog):
 def test_newest_obstacle_event_drives_the_parcel_status():
     raw = active_sample()
     raw["events"].append(
-        {"id": "S4", "name": "Adresa incompleta", "location": "Cluj", "date": "2025-08-06 09:00:00"}
+        {
+            "id": "S4",
+            "name": "Adresa incompleta",
+            "location": "Cluj",
+            "date": "2025-08-06 09:00:00",
+        }
     )
     parcel = normalize_parcel(raw)
     assert parcel["status"] is ParcelStatus.PROBLEM

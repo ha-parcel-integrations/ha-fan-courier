@@ -1,4 +1,5 @@
 """Tests for the FAN Courier refresh button."""
+
 from unittest.mock import AsyncMock, MagicMock
 
 from custom_components.fan_courier.button import FANCourierRefreshButton

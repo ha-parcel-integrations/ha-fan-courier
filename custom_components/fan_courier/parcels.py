@@ -12,10 +12,11 @@ timestamp parsing, the history builder, the sort contract, the delivered
 filter, the one-shot warning for unmapped statuses — is suite-wide machinery
 and should be left alone.
 """
+
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 import logging
-from datetime import datetime, timedelta, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -98,7 +99,11 @@ _STATUS_MAP: dict[str, ParcelStatus] = {
 _EVENT_TZ = ZoneInfo("Europe/Bucharest")
 
 _LOCKER_KEYWORDS = (
-    "fanbox", "easybox", "locker", "automat de colete", "disponibil pentru ridicare"
+    "fanbox",
+    "easybox",
+    "locker",
+    "automat de colete",
+    "disponibil pentru ridicare",
 )
 
 # Status codes we have already warned about, so each unmapped one is logged
@@ -153,11 +158,11 @@ def parse_iso(value: str | None) -> datetime | None:
     if not value:
         return None
     try:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(str(value))
     except ValueError:
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
+        parsed = parsed.replace(tzinfo=UTC)
     return parsed
 
 
@@ -173,7 +178,7 @@ def to_iso_timestamp(value: Any) -> str | None:
         return None
     if isinstance(value, (int, float)):
         try:
-            return datetime.fromtimestamp(value / 1000, tz=timezone.utc).isoformat()
+            return datetime.fromtimestamp(value / 1000, tz=UTC).isoformat()
         except (OverflowError, OSError, ValueError):
             return None
     return str(value)
@@ -217,20 +222,27 @@ def _ordered_events(events: list | None) -> list[dict[str, Any]]:
     """Return oldest-first events, with malformed dates retained at the end."""
     return sorted(
         (event for event in events or [] if isinstance(event, dict)),
-        key=lambda event: (_event_date(event) is None, _event_date(event) or datetime.max),
+        key=lambda event: (
+            _event_date(event) is None,
+            _event_date(event) or datetime.max,
+        ),
     )
 
 
-def build_history(events: list | None, *, max_events: int = HISTORY_MAX_EVENTS) -> list[dict]:
+def build_history(
+    events: list | None, *, max_events: int = HISTORY_MAX_EVENTS
+) -> list[dict]:
     """Build FAN history; timestamps assume Europe/Bucharest (see :func:`_event_date`)."""
     result = []
     for event in _ordered_events(events)[-max_events:]:
         parsed = _event_date(event)
-        result.append({
-            "timestamp": parsed.isoformat() if parsed else None,
-            "status": map_event_status(str(event.get("id") or "") or None),
-            "raw_status": str(event.get("id") or "") or None,
-        })
+        result.append(
+            {
+                "timestamp": parsed.isoformat() if parsed else None,
+                "status": map_event_status(str(event.get("id") or "") or None),
+                "raw_status": str(event.get("id") or "") or None,
+            }
+        )
     return result
 
 
@@ -259,7 +271,8 @@ def normalize_parcel(
     ):
         status = ParcelStatus.AT_PICKUP_POINT
     delivered_event = next(
-        (event for event in reversed(events) if str(event.get("id") or "") == "S2"), None
+        (event for event in reversed(events) if str(event.get("id") or "") == "S2"),
+        None,
     )
     delivered = delivered_event is not None
     if delivered:
@@ -285,7 +298,9 @@ def normalize_parcel(
         "planned_from": None,
         "planned_to": None,
         "pickup": status is ParcelStatus.AT_PICKUP_POINT,
-        "pickup_point": newest.get("location") if status is ParcelStatus.AT_PICKUP_POINT else None,
+        "pickup_point": newest.get("location")
+        if status is ParcelStatus.AT_PICKUP_POINT
+        else None,
         "url": tracking_url(barcode),
         "weight": raw.get("weight"),
         "dimensions": format_dimensions(
@@ -327,14 +342,12 @@ def apply_delivered_filter(parcels: list[dict], entry: ConfigEntry) -> list[dict
     shows.
     """
     options = entry.options
-    filter_type = options.get(
-        CONF_DELIVERED_FILTER_TYPE, DEFAULT_DELIVERED_FILTER_TYPE
-    )
+    filter_type = options.get(CONF_DELIVERED_FILTER_TYPE, DEFAULT_DELIVERED_FILTER_TYPE)
     amount = int(
         options.get(CONF_DELIVERED_FILTER_AMOUNT, DEFAULT_DELIVERED_FILTER_AMOUNT)
     )
     if filter_type == "days":
-        cutoff = datetime.now(timezone.utc) - timedelta(days=amount)
+        cutoff = datetime.now(UTC) - timedelta(days=amount)
         return [
             parcel
             for parcel in parcels
