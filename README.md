@@ -115,6 +115,7 @@ Standard HA removal applies: **Settings → Devices & Services → FAN Courier �
 | `sensor.fan_courier_next_delivery` | Earliest expected delivery moment across all active parcels |
 | `sensor.fan_courier_awaiting_pickup` | Parcels currently waiting for you at a pickup point |
 | `sensor.fan_courier_delivered_parcels` | Recently delivered parcels (see the retention option) |
+| `calendar.fan_courier_deliveries` | Read-only calendar of expected deliveries, no extra API calls |
 | `sensor.fan_courier_last_successful_update` | Diagnostic: when FAN Courier was last polled successfully |
 
 A delivered parcel moves from its per-parcel sensor to the delivered sensor automatically.
@@ -178,7 +179,7 @@ logger:
 ## Troubleshooting
 
 - **A parcel shows `unknown`** — FAN Courier has not scanned it yet (their API answers `not_found` until the first scan), or the code is wrong. It will pick up automatically once scanned.
-- **A status logs "Unrecognised FAN Courier status"** — please [open an issue](https://github.com/ha-parcel-integrations/ha-fan-courier/issues/new) with the logged line so the mapping can be extended.
+- **A status logs "Unrecognised FAN Courier status"** — please [open an issue](https://github.com/ha-parcel-integrations/ha-fan-courier/issues/new?template=unrecognised_status.yml) with the logged line so the mapping can be extended.
 
 ## Related integrations
 
