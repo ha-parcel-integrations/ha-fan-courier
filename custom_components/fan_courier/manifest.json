@@ -1,6 +1,7 @@
 {
   "domain": "fan_courier",
   "name": "FAN Courier",
+  "categories": ["productivity_information"],
   "codeowners": [
     "@peter-mdf"
   ],
