@@ -37,13 +37,17 @@ This repo follows it exactly.
   summary+diagnostic sensors. Add a new non-parcel sensor's unique_id to the set.
 - **Per-parcel sensors are removed by the summary sensor** via
   `entity_registry.async_remove` (self-removal races and leaves ghosts).
-- **If this carrier can reach `ParcelStatus.AT_PICKUP_POINT` from a real raw
-  status/code**, it needs an `awaiting_pickup` sensor — see *Parcel contract*
-  in `CONVENTIONS.md`. Say "pickup point", not "ServicePoint"/"parcel
-  shop"/"locker", for the generic concept. `ha-dhl-nl`, `ha-dpd`, `ha-gls`,
-  `ha-inpost` are reference implementations; `fan_courier` reaches
-  `AT_PICKUP_POINT` via the `S46` event code and the locker-keyword rule, and
-  demonstrates it with its own `awaiting_pickup` sensor.
+- **The pickup-point summaries are a pair.** A carrier that can deliver to a
+  pickup point or locker exposes both `en_route_to_pickup_point` and
+  `awaiting_pickup`, even before a real parcel has shown the status or flag
+  (they read 0 until then; record it in `PENDING_*`). A carrier without pickup
+  points exposes neither and keeps `pickup` constantly False.
+  See *Parcel contract* in `CONVENTIONS.md`. Say "pickup point", not
+  "ServicePoint"/"parcel shop"/"locker", for the generic concept; the
+  example carrier demonstrates both canonical sensors.
+  `fan_courier` reaches `AT_PICKUP_POINT` via the `S46` event code and the
+  locker-keyword rule, and exposes both `awaiting_pickup` and
+  `en_route_to_pickup_point`.
 
 ## Carrier-specific notes
 
@@ -61,15 +65,17 @@ in the suite (a plain name string, not a directory/address object); it stays
 diagnostics both as the top-level `receiver` field and inside `raw.confirmation`
 (`diagnostics.py`'s `TO_REDACT`) — don't remove either entry. `sender` and
 delivery windows intentionally remain `None`: the payload has no sender
-field and no ETA. FAN's event dates are naive `YYYY-MM-DD HH:MM:SS` with no
+field and no ETA (the shared window helpers are present and ready for when
+one appears). FAN's event dates are naive `YYYY-MM-DD HH:MM:SS` with no
 UTC offset; `_event_date()` treats them as **Europe/Bucharest local time** —
 a deliberate assumption (FAN Courier is Romania-only), not an independently
 confirmed fact — and publishes them with that offset on both
 `history[].timestamp` and `delivered_at` (from the newest `S2` event).
 `delivered_at` is never derived from `confirmation.date`, which is a
 separate, unconfirmed field. Locker-keyword events can expose an
-`at_pickup_point` status and
-the event location as `pickup_point`. Unknown event codes become `unknown`
+`at_pickup_point` status. `pickup` is true once any event of the parcel was an
+`S46` or locker-keyword event, and stays true after collection; `pickup_point`
+is the location of the newest such event. Unknown event codes become `unknown`
 and emit a one-shot warning.
 
 The code map follows FAN Courier's own wording for each code. Codes that report
@@ -84,7 +90,14 @@ tracker-page-only `S56`/`S65`. `S46` maps to `at_pickup_point` on the
 carrier's "handed over on the delivery point" wording; it has not been
 confirmed that the parcel actually waits there. The locker-keyword rule matches
 on the event name, so an event that merely mentions a FANbox (for example a
-sender drop-off) would also read as `at_pickup_point`. API mechanics remain in the private
+sender drop-off) would also read as `at_pickup_point`. A parcel with an `S2` event is
+`delivered` even when `returnAwbNumber` is set; `returnAwbNumber` on a parcel
+without `S2` is `returning`. The payload has no field that says a parcel is
+bound for a pickup point before it arrives, so `en_route_to_pickup_point` reads
+0 until such a field is seen on a real parcel (a parcel only becomes `pickup`
+when its first pickup event arrives), and the event `location` of an `S46` or
+locker event has not been confirmed to be the locker's name rather than a city
+or depot. API mechanics remain in the private
 carrier-research notes.
 
 ## Running tests

@@ -35,7 +35,7 @@ A custom Home Assistant integration that tracks your [FAN Courier](https://www.f
 
 - Track any number of FAN Courier parcels by tracking code — no account needed
 - Per-parcel sensor with canonical status, FAN event code, pickup-point location where available, and a tracking deep-link
-- Summary sensors: incoming parcels, next delivery, awaiting pickup, recently delivered parcels
+- Summary sensors: incoming parcels, next delivery, en route to pickup point, awaiting pickup, recently delivered parcels
 - `fan_courier.track_parcel` / `fan_courier.untrack_parcel` services, so a dashboard button can add a parcel
 - Events + device triggers for no-code automations (parcel registered, status changed, delivered, delivery time changed)
 - Opt-in per-parcel status history
@@ -113,6 +113,7 @@ Standard HA removal applies: **Settings → Devices & Services → FAN Courier �
 | `sensor.fan_courier_incoming_parcels` | Number of active tracked parcels, full list under the `parcels` attribute |
 | `sensor.fan_courier_parcel_<code>` | One per tracked parcel; state is the canonical status, attributes carry the full normalised parcel |
 | `sensor.fan_courier_next_delivery` | Earliest expected delivery moment across all active parcels |
+| `sensor.fan_courier_en_route_to_pickup_point` | Parcels on their way to a pickup point that have not arrived yet |
 | `sensor.fan_courier_awaiting_pickup` | Parcels currently waiting for you at a pickup point |
 | `sensor.fan_courier_delivered_parcels` | Recently delivered parcels (see the retention option) |
 | `calendar.fan_courier_deliveries` | Read-only calendar of expected deliveries, no extra API calls |

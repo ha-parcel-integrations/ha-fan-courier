@@ -37,3 +37,9 @@ def pickup_sample() -> dict:
         )
     )
     return sample
+
+
+def collected_sample() -> dict:
+    sample = pickup_sample()
+    sample["events"].append(event("S2", "2025-08-06 10:00:00", "Livrat", "Bucuresti"))
+    return sample
