@@ -409,6 +409,7 @@ def normalize_parcel(
         "barcode": barcode,
         "sender": None,
         "receiver": (raw.get("confirmation") or {}).get("name") or None,
+        "contents": None,
         "status": status,
         "raw_status": raw_status,
         "delivered": delivered,
